@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>VTT Formatter</title>
+
+	<script lang="text/javascript" src="index.js"></script>
+</head>
+
+<body>
+
+	<h1>About</h1>
+
+	<p>Most contemporary online video hosting services (e.g. Microsoft Stream) offer automated methods for
+		generating
+		captions. Most also provide a way to download the captions. Often as <a
+			href="https://en.wikipedia.org/wiki/WebVTT">
+			WebVTT files</a>, a format designed for other systems, not for people to read or reuse.</p>
+	<p>This page converts WebVTT files into a format you can read and copy and paste elsewhere. e.g. into a
+		Word document to edit further and share with students. </p>
+	<p>It attempts to format the text into paragraphs using the simplistic idea that a pause in speaking of just less than a second indicates a new paragraph.</p>
+	<p>Note: all this work occurs in your web browser. Your content never leaves your computer.</p>
+
+	<input type="file" id="files" accept=".vtt" />
+
+	<script>
+		// when a file is uploaded do the conversion
+		document.querySelector('#files').addEventListener('change', (e) => {
+
+			let files = e.target.files, i = 0, reader = new FileReader;
+
+			reader.onload = (e) => {
+				let fileName = files[i].name;
+				let text = e.target.result;
+				html = formatVtt(text);
+				if (html !== '') {
+					document.getElementById('output').innerHTML = html;
+					document.getElementById('msgOutput').style.display = "";
+				}
+
+
+			}
+			reader.readAsText(files[i]);
+		}, false);
+
+		// copy formatted text into the clipboard
+
+		function copyToClip() {
+			// get the HTML as text with spacing, but remove empty lines
+			let text = document.getElementById("output").innerText;
+			text = text.replace(/(\r?\n)\s*\1+/g, '$1');
+			navigator.clipboard.writeText(text)
+				.then(() => {
+					alert('Text copied to clipboard');
+				})
+				.catch(err => {
+					alert('Error in copying text: ', err);
+				});
+		}
+		</script>
+
+
+
+
+	<div id="msgOutput" style="display:none">
+		<h3>Formatted transcript - click the button to copy to clipboard</h3>
+		<button class="copyButton" onclick="copyToClip();">Copy transcript</button>
+
+		<div id="output">
+		</div>
+	</div>
+
+</body>
+
+</html>

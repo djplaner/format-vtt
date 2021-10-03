@@ -1,0 +1,29 @@
+{
+  "name": "format-vtt",
+  "version": "0.0.1",
+  "description": "Format WebVTT files into semi-human readable text",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djplaner/format-vtt.git"
+  },
+  "keywords": [
+    "WebVTT",
+    "vtt",
+    "captions",
+    "subtitles"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/djplaner/format-vtt/issues"
+  },
+  "homepage": "https://github.com/djplaner/format-vtt#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1"
+  }
+}
