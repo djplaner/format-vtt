@@ -26,7 +26,7 @@ function createVttDictionary(vtt) {
   let vttDict = {};
   vttDict["messages"] = []; 
 
-  index = 0;
+  let index = 0;
   for (const line of lines) {
     if (line.startsWith("NOTE duration")) {
       let splitLines = line.split(':"');
@@ -131,7 +131,7 @@ function formatText(vttDict, pause = PARA_DIFF) {
   const start = vttDict["messages"].map((item) => item.start); //[item['start'] for item in vttDict['messages']];
   const stop = vttDict["messages"].map((item) => item.stop); //[item['stop'] for item in vttDict['messages']];
 
-  i = 0;
+  let i = 0;
   while (i < part_messages.length - 2) {
     // check to see if the start and stop times for subsequent messages are the same,
     // if not append the message to full_messages and increase the counter to check the next line
@@ -200,7 +200,7 @@ function formatText(vttDict, pause = PARA_DIFF) {
 function formatVtt(vtt) {
   let text = "";
   try {
-    dict = createVttDictionary(vtt);
+    let dict = createVttDictionary(vtt);
 
     if (dict["messages"].length === 0) {
       text = `<h3>Error</h3> <p>No captions detected</p>`;

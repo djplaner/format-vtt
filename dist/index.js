@@ -29,7 +29,7 @@ function createVttDictionary(vtt) {
   var vttDict = {};
   vttDict["messages"] = [];
 
-  index = 0;
+  var index = 0;
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
   var _iteratorError = undefined;
@@ -237,7 +237,7 @@ function formatText(vttDict) {
 function formatVtt(vtt) {
   var text = "";
   try {
-    dict = createVttDictionary(vtt);
+    var dict = createVttDictionary(vtt);
 
     if (dict["messages"].length === 0) {
       text = "<h3>Error</h3> <p>No captions detected</p>";
