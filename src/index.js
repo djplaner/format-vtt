@@ -1,11 +1,12 @@
+"use strict";
+
 /**
  * Following Javascript is a conversion of Python code from
  *  https://github.com/georgiewellock/VTT_formatter/blob/master/vttformatter/vttformatter.py
  */
 
-
 // default pause time suggesting separate paragraphs
-const PARA_DIFF = 500;
+var PARA_DIFF = 500;
 
 /**
  * Return an object containing information parsed from the vtt text, 
@@ -21,30 +22,57 @@ const PARA_DIFF = 500;
 
 function createVttDictionary(vtt) {
   // break vtt text into a sequence of lines
-  let lines = vtt.split(/\r?\n/).map((string) => string.trim());
+  var lines = vtt.split(/\r?\n/).map(function (string) {
+    return string.trim();
+  });
 
   let vttDict = {};
-  vttDict["messages"] = []; 
+  vttDict["messages"] = [];
 
-  index = 0;
-  for (const line of lines) {
-    if (line.startsWith("NOTE duration")) {
-      let splitLines = line.split(':"');
-      vttDict["duration"] = splitLines[1].replace('"', "").trim();
+  let index = 0;
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
 
-      let pattern = /[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{7}/;
-      if (!vttDict["duration"].match(pattern)) {
-        throw "duration not in correct format";
+  try {
+    for (var _iterator = lines[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var line = _step.value;
+
+      if (line.startsWith("NOTE duration")) {
+        var splitLines = line.split(':"');
+        vttDict["duration"] = splitLines[1].replace('"', "").trim();
+
+        var pattern = /[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]{7})?/;
+        if (!vttDict["duration"].match(pattern)) {
+          throw index + ") duration not in correct format " + vttDict["duration"];
+        }
+      }
+      if (line.startsWith("NOTE language")) {
+        vttDict["language"] = line.split(":")[1].trim();
+      }
+      if (line.startsWith("NOTE Confidence")) {
+        var msg = readMessage(index, lines);
+        vttDict["messages"].push(msg); //, messages );
+      }
+      if (line.startsWith('NOTE recognizability')) {
+        var _splitLines = line.split(':');
+        vttDict['recognizability'] = _splitLines[1].trim();
+      }
+      index++;
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
       }
     }
-    if (line.startsWith("NOTE language")) {
-      vttDict["language"] = line.split(":")[1].trim();
-    }
-    if (line.startsWith("NOTE Confidence")) {
-      let msg = readMessage(index, lines);
-      vttDict["messages"].push(msg); //, messages );
-    }
-    index++;
   }
 
   return vttDict;
@@ -68,14 +96,14 @@ function createVttDictionary(vtt) {
  */
 
 function readMessage(i, data) {
-  let message = {};
+  var message = {};
 
   // read each line of the message as per vtt format
   // parse relevant content and place into message object
   message["confidence"] = data[i].split(":")[1].trim();
-  let pattern = /[0-1]{1}.[0-9]+/;
+  var pattern = /[0-1]{1}.[0-9]+/;
   if (!message["confidence"].match(pattern)) {
-    throw `Confidence value ${message["confidence"]} not in correct format`;
+    throw "Confidence value " + message["confidence"] + " not in correct format";
   }
   // skip onto next lines - marker
   i += 2;
@@ -83,20 +111,29 @@ function readMessage(i, data) {
   message["marker"] = data[i].trim();
   pattern = new RegExp("[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", "i");
   if (!message["marker"].match(pattern)) {
-    throw "Marker not in UUID format";
+    pattern = /^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}/;
+    if (data[i].match(pattern)) {
+      //-- remove my_message['marker']
+      delete message['marker'];
+      console.log('skipping marker, straight to time');
+      // step i back to balance the auto increment next
+      i -= 1;
+    } else {
+      throw "Marker not in UUID format";
+    }
   }
 
   // skip onto start/stop
   i += 1;
-  let dSplit = data[i].split(" ");
+  var dSplit = data[i].split(" ");
   message["start"] = dSplit[0].trim();
   message["stop"] = dSplit[dSplit.length - 1].trim();
   pattern = /[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}/;
   if (!message["start"].match(pattern)) {
-    throw `Start time not in correct format - ${message["start"]}`;
+    throw "Start time not in correct format - " + message["start"];
   }
   if (!message["stop"].match(pattern)) {
-    throw `Stop time not in correct format - ${message["stop"]}`;
+    throw "Stop time not in correct format - " + message["stop"];
   }
 
   // read all of the content until a line break (empty line)
@@ -119,25 +156,52 @@ function readMessage(i, data) {
  * @returns {String} HTML of the vtt captions formatted into paragraphs
  */
 
-function formatText(vttDict, pause = PARA_DIFF) {
-  let part_messages = Array();
-  for (const item of vttDict["messages"]) {
-    part_messages = part_messages.concat(item["content"].join(" "));
+function formatText(vttDict) {
+  var pause = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : PARA_DIFF;
+
+  var part_messages = Array();
+  var _iteratorNormalCompletion2 = true;
+  var _didIteratorError2 = false;
+  var _iteratorError2 = undefined;
+
+  try {
+    for (var _iterator2 = vttDict["messages"][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+      var item = _step2.value;
+
+      part_messages = part_messages.concat(item["content"].join(" "));
+    }
+  } catch (err) {
+    _didIteratorError2 = true;
+    _iteratorError2 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion2 && _iterator2.return) {
+        _iterator2.return();
+      }
+    } finally {
+      if (_didIteratorError2) {
+        throw _iteratorError2;
+      }
+    }
   }
 
-  let full_messages = Array();
+  var full_messages = Array();
 
   // arrays start and stop will contain times when each message starts stops
-  const start = vttDict["messages"].map((item) => item.start); //[item['start'] for item in vttDict['messages']];
-  const stop = vttDict["messages"].map((item) => item.stop); //[item['stop'] for item in vttDict['messages']];
+  var start = vttDict["messages"].map(function (item) {
+    return item.start;
+  }); //[item['start'] for item in vttDict['messages']];
+  var stop = vttDict["messages"].map(function (item) {
+    return item.stop;
+  }); //[item['stop'] for item in vttDict['messages']];
 
-  i = 0;
+  let i = 0;
   while (i < part_messages.length - 2) {
     // check to see if the start and stop times for subsequent messages are the same,
     // if not append the message to full_messages and increase the counter to check the next line
-    let nextStart = new Date(`1970-01-01T${start[i + 1]}Z`);
-    let currentStop = new Date(`1970-01-01T${stop[i]}Z`);
-    let diff = nextStart.getTime() - currentStop.getTime();
+    var nextStart = new Date("1970-01-01T" + start[i + 1] + "Z");
+    var currentStop = new Date("1970-01-01T" + stop[i] + "Z");
+    var diff = nextStart.getTime() - currentStop.getTime();
     if (diff > pause) {
       full_messages = full_messages.concat(part_messages[i]);
       i++;
@@ -145,12 +209,12 @@ function formatText(vttDict, pause = PARA_DIFF) {
       // if the start and stop times are the same initialise an empty string and
       // loop over messages from that point and append them to the string until the
       // start and stop times are no longer consistent
-      let sentence = "";
+      var sentence = "";
       while (diff <= pause && i + 1 < part_messages.length - 2) {
         sentence = sentence + part_messages[i] + " ";
         i++;
-        nextStart = new Date(`1970-01-01T${start[i + 1]}Z`);
-        currentStop = new Date(`1970-01-01T${stop[i]}Z`);
+        nextStart = new Date("1970-01-01T" + start[i + 1] + "Z");
+        currentStop = new Date("1970-01-01T" + stop[i] + "Z");
         diff = nextStart.getTime() - currentStop.getTime();
       }
       sentence = sentence + part_messages[i];
@@ -160,35 +224,21 @@ function formatText(vttDict, pause = PARA_DIFF) {
   }
   // check the last 2 elements of the partial message list and append them to full_messages
   if (start[start.length - 1] === stop[stop.length - 2]) {
-    let end =
-      part_messages[part_messages.length - 2] +
-      " " +
-      part_messages[part_messages.length - 1];
+    var end = part_messages[part_messages.length - 2] + " " + part_messages[part_messages.length - 1];
     if (stop[stop.length - 2] === stop[stop.length - 3]) {
-      full_messages[full_messages.length - 1] =
-        full_messages[full_messages.length - 1] + " " + end;
+      full_messages[full_messages.length - 1] = full_messages[full_messages.length - 1] + " " + end;
     } else {
       full_messages = full_messages.concat(end);
     }
   } else if (stop[stop.length - 2] === stop[stop.length - 3]) {
-    full_messages[full_messages.length - 1] =
-      full_messages[full_messages.length - 1] +
-      " " +
-      part_messages[part_messages.length - 2];
-    full_messages = full_messages.concat(
-      part_messages[part_messages.length - 1]
-    );
+    full_messages[full_messages.length - 1] = full_messages[full_messages.length - 1] + " " + part_messages[part_messages.length - 2];
+    full_messages = full_messages.concat(part_messages[part_messages.length - 1]);
   } else {
-    full_messages = full_messages.concat(
-      part_messages[part_messages.length - 2]
-    );
-    full_messages = full_messages.concat(
-      part_messages[part_messages.length - 1]
-    );
+    full_messages = full_messages.concat(part_messages[part_messages.length - 2]);
+    full_messages = full_messages.concat(part_messages[part_messages.length - 1]);
   }
   return "<p>" + full_messages.join("</p><p>") + "</p>";
 }
-
 
 /**
  * 
@@ -200,20 +250,21 @@ function formatText(vttDict, pause = PARA_DIFF) {
 function formatVtt(vtt) {
   let text = "";
   try {
-    dict = createVttDictionary(vtt);
+    let dict = createVttDictionary(vtt);
 
     if (dict["messages"].length === 0) {
-      text = `<h3>Error</h3> <p>No captions detected</p>`;
-    } else { 
+      text = "<h3>Error</h3> <p>No captions detected</p>";
+    } else {
       text = formatText(dict);
     }
   } catch (e) {
     console.error(e);
+    // update div#output to show error
+    text = "<h3>Error preparing transcript</h3> <p>" + e + "</p>";
   }
   return text;
 }
 
-
-module.exports = {
-	formatVtt
-}
+//module.exports = {
+//  formatVtt: formatVtt
+//};
