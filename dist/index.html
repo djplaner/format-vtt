@@ -31,6 +31,8 @@
 		document.querySelector('#files').addEventListener('change', (e) => {
 
 			let files = e.target.files, i = 0, reader = new FileReader;
+			// rest div#copyResult to empty
+			document.querySelector('#copyResult').innerHTML = '';
 
 			reader.onload = (e) => {
 				let fileName = files[i].name;
@@ -54,7 +56,9 @@
 			text = text.replace(/(\r?\n)\s*\1+/g, '$1');
 			navigator.clipboard.writeText(text)
 				.then(() => {
-					alert('Text copied to clipboard');
+					//alert('Text copied to clipboard');
+					// set content of div#copyResult to success
+					document.getElementById('copyResult').innerHTML = '<span style="color:green">Copied to clipboard</span>';
 				})
 				.catch(err => {
 					alert('Error in copying text: ', err);
@@ -69,6 +73,7 @@
 		<h3>Formatted transcript - click the button to copy to clipboard</h3>
 		<button class="copyButton" onclick="copyToClip();">Copy transcript</button>
 
+		<div id="copyResult"></div>
 		<div id="output">
 		</div>
 	</div>
